@@ -4,18 +4,20 @@ namespace JornadaMilhas.Test
 {
     public class OfertaViagemConstructor
     {
-        [Fact]
-        public void RetornaOfertaValidaQuandoDadosValidos()
+        [Theory]
+        [InlineData("", null, "2025-10-06", "2025-10-16", 0, false)]
+        [InlineData("São Paulo", "Rio de Janeiro", "2025-10-16", "2025-10-06", 100.00, false)]
+        [InlineData("São Paulo", "Rio de Janeiro", "2025-10-06", "2025-10-16", -100.00, false)]
+        [InlineData("São Paulo", "Rio de Janeiro", "2025-10-06", "2025-10-16", 100.00, true)]
+        public void RetornaSeEhValidoDeAcordoComOsDadosDeEntrada(string origem, string destino, string dataIda, string dataVolta, double preco, bool validacao)
         {
-            Rota rota = new("São Paulo", "Rio de Janeiro");
+            Rota rota = new(origem, destino);
 
-            Periodo periodo = new(new DateTime(2025, 10, 6), new DateTime(2025, 10, 10));
-
-            double preco = 100.00;
+            Periodo periodo = new(DateTime.Parse(dataIda), DateTime.Parse(dataVolta));
 
             OfertaViagem oferta = new(rota, periodo, preco);
 
-            Assert.True(oferta.EhValido);
+            Assert.Equal(validacao, oferta.EhValido);
         }
 
         [Fact]
@@ -41,13 +43,14 @@ namespace JornadaMilhas.Test
             Assert.False(oferta.EhValido);
         }
 
-        [Fact]
-        public void RetornaOfertaInvalidaEMensagemDeErroQuandoPrecoNegativo()
+        [Theory]
+        [InlineData(0)]
+        [InlineData(-100.00)]
+        public void RetornaOfertaInvalidaEMensagemDeErroQuandoPrecoMenorOuIgualZero(double preco)
         {
             // Arrange
             Rota rota = new("São Paulo", "Rio de Janeiro");
             Periodo periodo = new(new DateTime(2025, 10, 6), new DateTime(2025, 10, 10));
-            double preco = -100.00;
             // Act
             OfertaViagem oferta = new(rota, periodo, preco);
             // Assert
